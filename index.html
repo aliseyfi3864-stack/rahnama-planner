@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#3157d5">
+<meta name="description" content="راهنما پلنر؛ برنامه‌ریزی روزانه و مدیریت وظایف به زبان فارسی.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>راهنما پلنر</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#182033;--muted:#667085;--line:#e5e9f2;--blue:#3157d5;--blue2:#eaf0ff;--green:#16845b;--red:#c43d4b;--amber:#946200}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Tahoma,Arial,sans-serif;font-size:14px;line-height:1.65}
+header{background:linear-gradient(135deg,#263fa9,#426cf0);color:#fff;padding:24px 18px 30px;border-radius:0 0 24px 24px}
+.wrap{max-width:760px;margin:auto;padding:0 14px}header .wrap{padding:0 4px}
+.kicker{font-size:12px;opacity:.85}.brand{font-size:25px;font-weight:800;margin:4px 0}.subtitle{font-size:13px;opacity:.9}
+main{margin-top:-14px;padding-bottom:32px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px}
+.stat,.panel,.task{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 16px #1c2e5908}
+.stat{padding:12px 10px;text-align:center}.stat strong{display:block;font-size:23px}.stat span{font-size:11px;color:var(--muted)}
+.panel{padding:16px;margin-bottom:14px}.panel-title{font-weight:800;font-size:16px;margin:0 0 12px}
+label{display:block;font-size:12px;color:var(--muted);margin:0 0 5px}
+input,textarea,select{font:inherit;color:var(--ink);background:#fff;border:1px solid #d8deeb;border-radius:10px;padding:11px;width:100%;outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px #3157d51a}
+textarea{min-height:72px;resize:vertical}.fields{display:grid;grid-template-columns:1fr 1fr;gap:11px}.field{min-width:0}.wide{grid-column:1/-1}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+button{font:inherit;border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
+.primary{background:var(--blue);color:white}.secondary{background:var(--blue2);color:var(--blue)}.ghost{background:#f0f2f7;color:#475467}.danger{background:#fff0f1;color:var(--red)}button:active{transform:scale(.98)}
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}.filters .wide{grid-column:1/-1}
+.tasklist{display:grid;gap:9px}.task{padding:13px}.task-top{display:flex;gap:10px;align-items:flex-start}.check{width:21px;height:21px;accent-color:var(--green);flex-shrink:0;margin-top:3px}.task-main{flex:1;min-width:0}.task-title{font-size:15px;font-weight:800;overflow-wrap:anywhere}.task.done .task-title{text-decoration:line-through;color:var(--muted)}.desc{color:var(--muted);font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:4px}.meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.pill{border-radius:99px;padding:3px 8px;background:#f0f2f7;color:#475467;font-size:11px}.pill.today{background:#fff4d6;color:var(--amber)}.pill.done{background:#e5f7ee;color:var(--green)}.task-buttons{display:flex;gap:6px;margin-top:11px}.task-buttons button{font-size:12px;padding:7px 10px}
+.empty{padding:28px 12px;text-align:center;color:var(--muted);border:1px dashed #cfd6e5;border-radius:14px}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:8px 0 24px}.notice{font-size:12px;color:var(--muted);margin-top:10px}
+@media(max-width:390px){.fields{grid-template-columns:1fr}.wide{grid-column:auto}.filters{grid-template-columns:1fr}.filters .wide{grid-column:auto}.stat strong{font-size:20px}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<div class="kicker">برنامه‌ریزی ساده، هر روز</div>
+<div class="brand">راهنما پلنر</div>
+<div class="subtitle">کارهایت را بنویس، پیگیری کن و با خیال راحت جلو برو.</div>
+</div></header>
+<main class="wrap">
+<section class="stats" aria-label="آمار وظایف">
+<div class="stat"><strong id="totalCount">۰</strong><span>همه وظایف</span></div>
+<div class="stat"><strong id="openCount">۰</strong><span>باقی‌مانده</span></div>
+<div class="stat"><strong id="doneCount">۰</strong><span>انجام‌شده</span></div>
+</section>
+
+<section class="panel">
+<h2 class="panel-title" id="formHeading">＋ افزودن وظیفه</h2>
+<form id="taskForm">
+<input id="taskId" type="hidden">
+<div class="fields">
+<div class="field wide"><label for="taskTitle">عنوان وظیفه *</label><input id="taskTitle" required maxlength="120" placeholder="مثلاً تماس با مشتری"></div>
+<div class="field"><label for="taskDate">تاریخ (مثلاً ۱۴۰۵/۰۷/۲۹)</label><input id="taskDate" maxlength="20" placeholder="سال/ماه/روز" inputmode="numeric"></div>
+<div class="field"><label for="taskPriority">اولویت</label><select id="taskPriority"><option value="معمولی">معمولی</option><option value="مهم">مهم</option><option value="فوری">فوری</option></select></div>
+<div class="field wide"><label for="taskNotes">توضیحات (اختیاری)</label><textarea id="taskNotes" maxlength="1000" placeholder="جزئیات یا یادداشت کوتاه..."></textarea></div>
+</div>
+<div class="actions"><button class="primary" type="submit" id="saveButton">ذخیره وظیفه</button><button class="ghost" type="button" id="cancelEdit" hidden>لغو ویرایش</button></div>
+</form>
+<div class="notice">اطلاعات این نسخه در حافظهٔ مرورگر همین دستگاه ذخیره می‌شود. پاک‌کردن داده‌های مرورگر ممکن است آن‌ها را حذف کند.</div>
+</section>
+
+<section class="panel">
+<h2 class="panel-title">فهرست وظایف</h2>
+<div class="filters">
+<div class="field wide"><label for="searchBox">جست‌وجو</label><input id="searchBox" placeholder="جست‌وجو در عنوان و توضیحات..."></div>
+<div class="field"><label for="statusFilter">وضعیت</label><select id="statusFilter"><option value="all">همه</option><option value="open">باقی‌مانده</option><option value="done">انجام‌شده</option></select></div>
+<div class="field"><label for="priorityFilter">اولویت</label><select id="priorityFilter"><option value="all">همه اولویت‌ها</option><option value="فوری">فوری</option><option value="مهم">مهم</option><option value="معمولی">معمولی</option></select></div>
+<div class="field wide"><label for="sortFilter">ترتیب نمایش</label><select id="sortFilter"><option value="newest">تازه‌ترین ثبت‌شده</option><option value="date">تاریخ وظیفه (متنی)</option><option value="priority">اولویت: فوری تا معمولی</option></select></div>
+</div>
+<div id="taskList" class="tasklist"></div>
+<div class="actions"><button class="secondary" id="exportButton" type="button">خروجی پشتیبان (JSON)</button><button class="ghost" id="importButton" type="button">بازیابی پشتیبان</button><input id="importFile" type="file" accept="application/json,.json" hidden></div>
+<div class="notice">پیشنهاد: هر چند وقت یک‌بار خروجی پشتیبان بگیر تا یک نسخه از وظایف خارج از مرورگر هم داشته باشی.</div>
+</section>
+<footer>راهنما پلنر · نسخهٔ اولیهٔ وب‌اپ</footer>
+</main>
+<script>
+(function(){
+'use strict';
+const KEY='rahnamaPlannerTasks_v1';
+const $=id=>document.getElementById(id);
+let tasks=[];
+try{const parsed=JSON.parse(localStorage.getItem(KEY)||'[]');tasks=Array.isArray(parsed)?parsed:[]}catch(e){tasks=[]}
+const faDigits=s=>String(s).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+const toFa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[Number(d)]);
+function save(){try{localStorage.setItem(KEY,JSON.stringify(tasks));return true}catch(e){alert('ذخیره‌سازی انجام نشد. فضای مرورگر یا تنظیمات آن را بررسی کن.');return false}}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function todayText(){const d=new Date();return toFa(d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0'))}
+function stats(){$('totalCount').textContent=toFa(tasks.length);$('doneCount').textContent=toFa(tasks.filter(t=>t.done).length);$('openCount').textContent=toFa(tasks.filter(t=>!t.done).length)}
+function render(){
+ stats(); const q=$('searchBox').value.trim().toLocaleLowerCase();const status=$('statusFilter').value;const priority=$('priorityFilter').value;const sort=$('sortFilter').value;
+ let list=tasks.filter(t=>(!q||(t.title+' '+(t.notes||'')).toLocaleLowerCase().includes(q))&&(status==='all'||(status==='done'?t.done:!t.done))&&(priority==='all'||t.priority===priority));
+ if(sort==='date')list.sort((a,b)=>(faDigits(a.date||'9999/99/99')).localeCompare(faDigits(b.date||'9999/99/99')));
+ else if(sort==='priority'){const rank={'فوری':0,'مهم':1,'معمولی':2};list.sort((a,b)=>rank[a.priority]-rank[b.priority])}
+ else list.sort((a,b)=>b.created-a.created);
+ const root=$('taskList');
+ if(!list.length){root.innerHTML='<div class="empty">وظیفه‌ای برای نمایش نیست.<br>می‌توانی از فرم بالا یک وظیفه اضافه کنی.</div>';return}
+ root.innerHTML=list.map(t=>`<article class="task ${t.done?'done':''}" data-id="${esc(t.id)}">
+ <div class="task-top"><input class="check" type="checkbox" aria-label="تغییر وضعیت وظیفه" data-action="toggle" data-id="${esc(t.id)}" ${t.done?'checked':''}>
+ <div class="task-main"><div class="task-title">${esc(t.title)}</div>${t.notes?`<div class="desc">${esc(t.notes)}</div>`:''}
+ <div class="meta">${t.date?`<span class="pill">📅 ${esc(t.date)}</span>`:''}<span class="pill ${t.priority==='فوری'?'today':''}">${esc(t.priority)}</span><span class="pill ${t.done?'done':''}">${t.done?'انجام‌شده':'باقی‌مانده'}</span></div></div></div>
+ <div class="task-buttons"><button type="button" class="secondary" data-action="edit" data-id="${esc(t.id)}">ویرایش</button><button type="button" class="danger" data-action="delete" data-id="${esc(t.id)}">حذف</button></div></article>`).join('');
+}
+function resetForm(){$('taskForm').reset();$('taskId').value='';$('formHeading').textContent='＋ افزودن وظیفه';$('saveButton').textContent='ذخیره وظیفه';$('cancelEdit').hidden=true;$('taskPriority').value='معمولی'}
+$('taskForm').addEventListener('submit',e=>{e.preventDefault();const title=$('taskTitle').value.trim();if(!title)return;const id=$('taskId').value;const record={title,date:$('taskDate').value.trim(),priority:$('taskPriority').value,notes:$('taskNotes').value.trim()};
+ if(id){const i=tasks.findIndex(t=>t.id===id);if(i>=0)tasks[i]={...tasks[i],...record}}else tasks.push({...record,id:String(Date.now())+'-'+Math.random().toString(36).slice(2,7),done:false,created:Date.now()});
+ save();resetForm();render();});
+$('cancelEdit').addEventListener('click',resetForm);
+$('taskList').addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(!b)return;const t=tasks.find(x=>x.id===b.dataset.id);if(!t)return;
+ if(b.dataset.action==='edit'){$('taskId').value=t.id;$('taskTitle').value=t.title;$('taskDate').value=t.date||'';$('taskPriority').value=t.priority;$('taskNotes').value=t.notes||'';$('formHeading').textContent='ویرایش وظیفه';$('saveButton').textContent='ذخیره تغییرات';$('cancelEdit').hidden=false;$('taskTitle').focus();window.scrollTo({top:0,behavior:'smooth'})}
+ if(b.dataset.action==='delete'&&confirm('این وظیفه حذف شود؟')){tasks=tasks.filter(x=>x.id!==t.id);save();render();if($('taskId').value===t.id)resetForm()}
+});
+$('taskList').addEventListener('change',e=>{const c=e.target.closest('input[data-action="toggle"]');if(!c)return;const t=tasks.find(x=>x.id===c.dataset.id);if(t){t.done=c.checked;save();render()}});
+['searchBox','statusFilter','priorityFilter','sortFilter'].forEach(id=>$(id).addEventListener(id==='searchBox'?'input':'change',render));
+$('exportButton').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({app:'rahnama-planner',version:1,tasks},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='rahnama-planner-backup.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)});
+$('importButton').addEventListener('click',()=>$('importFile').click());
+$('importFile').addEventListener('change',async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());const incoming=Array.isArray(data)?data:data.tasks;if(!Array.isArray(incoming)||!incoming.every(t=>t&&typeof t.title==='string'))throw new Error('bad');if(confirm('بازیابی پشتیبان، وظایف فعلی را جایگزین می‌کند. ادامه می‌دهی؟')){tasks=incoming.map((t,i)=>({id:String(t.id||Date.now()+'-'+i),title:t.title,date:String(t.date||''),priority:['فوری','مهم','معمولی'].includes(t.priority)?t.priority:'معمولی',notes:String(t.notes||''),done:!!t.done,created:Number(t.created)||Date.now()}));save();resetForm();render();alert('پشتیبان بازیابی شد.')}}catch(err){alert('فایل پشتیبان معتبر نیست.')}finally{$('importFile').value=''}});
+render();
+
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "id": "./",
+  "name": "راهنما پلنر",
+  "short_name": "راهنما",
+  "description": "برنامه‌ریزی روزانه و مدیریت وظایف به زبان فارسی",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f6fb",
+  "theme_color": "#3157d5",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
