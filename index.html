@@ -45,6 +45,97 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:8px 0 24px}.n
 .day-tasks{display:grid;gap:8px;margin-top:12px}
 @media(max-width:390px){.calendar-grid{gap:3px}.calendar-day,.calendar-weekday{font-size:11px}.calendar-day{padding:7px 0}}
 
+
+/* Rahnama Planner visual refresh — presentation only; app logic is unchanged. */
+:root{
+ --bg:#f3f6fc;--card:#ffffff;--ink:#17233b;--muted:#6b7890;--line:#e2e8f2;
+ --blue:#3157d5;--blue2:#eaf0ff;--green:#16845b;--red:#c43d4b;--amber:#946200;
+ --shadow:0 10px 30px rgba(26,45,89,.065);--radius:20px;
+}
+html{scroll-behavior:smooth}
+body{background:radial-gradient(ellipse at 85% 0%,#e7edff 0,transparent 34rem),var(--bg);color:var(--ink);font-size:14px;line-height:1.75}
+header{position:relative;isolation:isolate;overflow:hidden;background:linear-gradient(125deg,#172b68 0%,#2949b2 54%,#4778f2 100%);padding:27px 18px 42px;border-radius:0 0 30px 30px;box-shadow:0 12px 32px rgba(36,67,157,.18)}
+header:before,header:after{content:"";position:absolute;z-index:-1;border-radius:50%;pointer-events:none}
+header:before{width:220px;height:220px;left:-60px;top:-115px;border:1px solid rgba(255,255,255,.17);box-shadow:0 0 0 25px rgba(255,255,255,.035),0 0 0 52px rgba(255,255,255,.025)}
+header:after{width:110px;height:110px;right:62%;bottom:-78px;background:rgba(255,255,255,.075)}
+header .wrap{position:relative;padding:0 5px}
+.kicker{display:inline-flex;align-items:center;gap:7px;font-size:11px;letter-spacing:.1px;color:#e4ebff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.17);padding:4px 10px;border-radius:99px}
+.kicker:before{content:"";width:6px;height:6px;background:#8ff0c6;border-radius:50%;box-shadow:0 0 0 4px rgba(143,240,198,.13)}
+.brand{font-size:clamp(27px,6vw,34px);font-weight:900;letter-spacing:-.6px;margin:10px 0 2px;text-shadow:0 2px 12px rgba(0,0,0,.12)}
+.subtitle{font-size:13px;max-width:420px;color:#e7edff;opacity:1}
+main{margin-top:-20px;padding-bottom:32px;position:relative}
+.stats{gap:10px;margin-bottom:16px}
+.stat{position:relative;overflow:hidden;padding:14px 8px 13px;border:1px solid rgba(255,255,255,.85);border-radius:18px;box-shadow:var(--shadow);background:rgba(255,255,255,.94);backdrop-filter:blur(8px)}
+.stat:before{content:"";position:absolute;top:0;right:0;left:0;height:3px;background:linear-gradient(90deg,#6f8cff,#3157d5);opacity:.9}
+.stat:nth-child(2):before{background:linear-gradient(90deg,#8cd9b8,#16845b)}
+.stat:nth-child(3):before{background:linear-gradient(90deg,#f8d57b,#d99b17)}
+.stat strong{font-size:clamp(22px,5vw,28px);line-height:1.4;color:#203b88;font-weight:900}
+.stat:nth-child(2) strong{color:#16845b}.stat:nth-child(3) strong{color:#a26b00}
+.stat span{display:block;margin-top:2px;font-size:11px;color:var(--muted);font-weight:700}
+.panel{padding:clamp(14px,4vw,20px);margin-bottom:15px;border:1px solid rgba(222,230,244,.95);border-radius:var(--radius);box-shadow:var(--shadow);background:var(--card)}
+.panel-title{display:flex;align-items:center;gap:9px;font-size:16px;font-weight:900;margin:0 0 15px;letter-spacing:-.15px}
+.panel-title:before{content:"";display:block;flex:0 0 5px;width:5px;height:23px;border-radius:99px;background:linear-gradient(180deg,#5f80ff,#3157d5)}
+label{font-size:12px;color:#53627c;font-weight:700;margin-bottom:6px}
+input,textarea,select{font-size:14px;background:#fbfcff;border:1px solid #dce4f1;border-radius:12px;padding:12px 13px;min-height:45px;transition:border-color .18s,box-shadow .18s,background .18s}
+input::placeholder,textarea::placeholder{color:#a0aabe}
+input:focus,textarea:focus,select:focus{background:#fff;border-color:#6b88f4;box-shadow:0 0 0 4px rgba(49,87,213,.10)}
+textarea{min-height:86px}
+.fields{gap:13px}
+.actions{gap:9px;margin-top:14px}
+button{min-height:41px;border-radius:12px;padding:10px 15px;font-weight:800;transition:transform .15s,box-shadow .15s,background .15s}
+button:active{transform:translateY(1px) scale(.985)}
+button:focus-visible{outline:3px solid rgba(49,87,213,.3);outline-offset:2px}
+.primary{background:linear-gradient(135deg,#3157d5,#426cf0);box-shadow:0 5px 13px rgba(49,87,213,.2);color:white}
+.primary:hover{box-shadow:0 7px 18px rgba(49,87,213,.28)}
+.secondary{background:#edf2ff;color:#2e50be;border:1px solid #e0e8ff}
+.secondary:hover{background:#e2eaff}
+.ghost{background:#f3f5f9;color:#526078;border:1px solid #e7ebf3}
+.danger{background:#fff1f2;color:#b72e3d;border:1px solid #ffe0e4}
+.notice{font-size:11px;line-height:1.9;color:#78849a;margin-top:11px}
+.filters{gap:11px;margin-bottom:14px}
+.tasklist{gap:11px}
+.task{padding:14px;border:1px solid #e3e9f3;border-radius:17px;box-shadow:0 4px 15px rgba(26,45,89,.045);transition:border-color .2s,transform .2s,box-shadow .2s}
+.task:has(.check:checked){background:linear-gradient(120deg,#fff,#fbfdfc)}
+.task-top{gap:11px}
+.check{appearance:none;width:22px;height:22px;min-height:22px;padding:0;margin:2px 0 0;border-radius:7px;border:1.5px solid #c5cfdf;background:#fff;display:grid;place-items:center;cursor:pointer}
+.check:checked{background:#16845b;border-color:#16845b;box-shadow:0 2px 7px rgba(22,132,91,.2)}
+.check:checked:after{content:"✓";color:#fff;font-size:14px;font-weight:900;line-height:1}
+.task-title{font-size:15px;line-height:1.7;color:#1d2b46}
+.task.done .task-title{color:#7d899c}
+.desc{font-size:12px;line-height:1.9;color:#69768e;margin-top:5px}
+.meta{gap:6px;margin-top:10px}
+.pill{font-size:11px;padding:4px 9px;border:1px solid #e8edf5;background:#f5f7fb;color:#526078;font-weight:700}
+.pill.today{background:#fff5dc;color:#8d6200;border-color:#f9e8b5}
+.pill.done{background:#e7f8ef;color:#13764f;border-color:#d1f0df}
+.task-buttons{gap:7px;margin-top:13px;padding-top:11px;border-top:1px solid #eef1f7}
+.task-buttons button{min-height:35px;font-size:12px;padding:7px 12px}
+.empty{padding:25px 14px;border:1px dashed #cbd5e5;border-radius:15px;background:#fafbfe;color:#77839a;font-size:12px}
+.calendar-head{margin-bottom:14px}
+.calendar-head strong{font-size:15px;font-weight:900;color:#263c82;background:#f0f4ff;border:1px solid #e3eaff;border-radius:11px;padding:6px 11px;white-space:nowrap}
+.calendar-grid{gap:6px}
+.calendar-weekday{font-size:11px;color:#7b879c;padding:5px 1px;font-weight:800}
+.calendar-day{position:relative;border-radius:11px;padding:10px 0;background:#f6f8fc;border:1px solid #edf1f7;font-weight:700;color:#36445e;min-height:40px}
+.calendar-day:hover:not(:disabled){background:#eaf0ff;border-color:#dce5ff}
+.calendar-day.selected{background:linear-gradient(145deg,#3157d5,#4776ef);color:white;border-color:#3157d5;box-shadow:0 4px 10px rgba(49,87,213,.2)}
+.calendar-day.has-tasks{border:1.5px solid #27a575;font-weight:900}
+.calendar-day.has-tasks:after{content:"";position:absolute;bottom:4px;left:calc(50% - 2px);width:4px;height:4px;border-radius:50%;background:#27a575}
+.calendar-day.selected.has-tasks:after{background:#fff}
+.calendar-day.today{box-shadow:inset 0 0 0 2px #efbd43}
+.calendar-day.selected.today{box-shadow:inset 0 0 0 2px #f9d76e,0 4px 10px rgba(49,87,213,.2)}
+.day-tasks{gap:9px;margin-top:14px}
+.day-tasks>strong{font-size:13px;color:#34466c}
+.day-tasks .task{box-shadow:none;background:#fbfcff}
+footer{font-size:11px;color:#8994a8;padding:10px 0 26px}
+@media(max-width:390px){
+ header{padding:23px 16px 38px;border-radius:0 0 25px 25px}
+ .stat{padding:12px 5px}.stat span{font-size:10px}
+ .panel{border-radius:17px}
+ .fields{grid-template-columns:1fr}.wide{grid-column:auto}.filters{grid-template-columns:1fr}.filters .wide{grid-column:auto}
+ .calendar-grid{gap:3px}.calendar-day,.calendar-weekday{font-size:11px}.calendar-day{padding:8px 0;min-height:36px}
+ .calendar-head button{padding:8px 10px;font-size:11px}.calendar-head strong{font-size:13px;padding:6px 8px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
+
 </style>
 </head>
 <body>
