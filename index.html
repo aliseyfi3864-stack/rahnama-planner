@@ -31,6 +31,21 @@ button{font:inherit;border:0;border-radius:10px;padding:10px 14px;font-weight:70
 .empty{padding:28px 12px;text-align:center;color:var(--muted);border:1px dashed #cfd6e5;border-radius:14px}
 footer{text-align:center;color:var(--muted);font-size:11px;padding:8px 0 24px}.notice{font-size:12px;color:var(--muted);margin-top:10px}
 @media(max-width:390px){.fields{grid-template-columns:1fr}.wide{grid-column:auto}.filters{grid-template-columns:1fr}.filters .wide{grid-column:auto}.stat strong{font-size:20px}}
+
+.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.calendar-day,.calendar-weekday{min-width:0;text-align:center;padding:8px 2px;border-radius:9px}
+.calendar-weekday{font-size:11px;color:var(--muted);font-weight:700}
+.calendar-day{background:#f3f5fb;color:var(--ink);border:1px solid transparent;padding:9px 0}
+.calendar-day.selected{background:var(--blue);color:#fff}
+.calendar-day.has-tasks{border-color:var(--green);font-weight:800}
+.calendar-day.today{box-shadow:inset 0 0 0 2px #f0b429}
+.calendar-day:disabled{opacity:.3}
+.calendar-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.calendar-head strong{font-size:15px}
+.day-tasks{display:grid;gap:8px;margin-top:12px}
+.reminder-pill{background:#fff4d6;color:#805800}
+@media(max-width:390px){.calendar-grid{gap:3px}.calendar-day,.calendar-weekday{font-size:11px}.calendar-day{padding:7px 0}}
+
 </style>
 </head>
 <body>
@@ -53,12 +68,35 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:8px 0 24px}.n
 <div class="fields">
 <div class="field wide"><label for="taskTitle">عنوان وظیفه *</label><input id="taskTitle" required maxlength="120" placeholder="مثلاً تماس با مشتری"></div>
 <div class="field"><label for="taskDate">تاریخ (مثلاً ۱۴۰۵/۰۷/۲۹)</label><input id="taskDate" maxlength="20" placeholder="سال/ماه/روز" inputmode="numeric"></div>
+
+<div class="field"><label for="reminderDate">تاریخ یادآوری (شمسی، اختیاری)</label><input id="reminderDate" maxlength="20" placeholder="۱۴۰۵/۰۷/۲۹" inputmode="numeric"></div>
+<div class="field"><label for="reminderTime">ساعت یادآوری</label><input id="reminderTime" type="time"></div>
 <div class="field"><label for="taskPriority">اولویت</label><select id="taskPriority"><option value="معمولی">معمولی</option><option value="مهم">مهم</option><option value="فوری">فوری</option></select></div>
 <div class="field wide"><label for="taskNotes">توضیحات (اختیاری)</label><textarea id="taskNotes" maxlength="1000" placeholder="جزئیات یا یادداشت کوتاه..."></textarea></div>
 </div>
 <div class="actions"><button class="primary" type="submit" id="saveButton">ذخیره وظیفه</button><button class="ghost" type="button" id="cancelEdit" hidden>لغو ویرایش</button></div>
 </form>
 <div class="notice">اطلاعات این نسخه در حافظهٔ مرورگر همین دستگاه ذخیره می‌شود. پاک‌کردن داده‌های مرورگر ممکن است آن‌ها را حذف کند.</div>
+</section>
+
+
+<section class="panel" id="calendarPanel">
+<h2 class="panel-title">تقویم شمسی</h2>
+<div class="calendar-head">
+<button class="secondary" type="button" id="prevMonth" aria-label="ماه قبل">ماه قبل</button>
+<strong id="calendarTitle">تقویم شمسی</strong>
+<button class="secondary" type="button" id="nextMonth" aria-label="ماه بعد">ماه بعد</button>
+</div>
+<div class="calendar-grid" id="calendarGrid" aria-label="روزهای ماه"></div>
+<div class="notice">روی هر روز بزن تا وظایف همان روز را ببینی یا تاریخ آن را در فرم وارد کنی. روزهای دارای وظیفه با حاشیه مشخص‌اند.</div>
+<div class="day-tasks" id="dayTasks"></div>
+<div class="actions"><button class="secondary" type="button" id="useSelectedDate">استفاده از تاریخ انتخاب‌شده</button></div>
+</section>
+<section class="panel">
+<h2 class="panel-title">اعلان یادآوری</h2>
+<div class="notice">برای دریافت اعلان، مجوز را فعال کن. یادآوری در این نسخه وقتی برنامه باز است بررسی می‌شود؛ اگر برنامه کاملاً بسته باشد، اعلان دقیق و تضمینی نیست.</div>
+<div class="actions"><button class="primary" type="button" id="enableNotifications">فعال‌سازی اعلان‌ها</button><button class="ghost" type="button" id="checkReminders">بررسی یادآوری‌ها</button></div>
+<div class="notice" id="notificationStatus" role="status">وضعیت اعلان‌ها بررسی نشده است.</div>
 </section>
 
 <section class="panel">
@@ -73,7 +111,7 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:8px 0 24px}.n
 <div class="actions"><button class="secondary" id="exportButton" type="button">خروجی پشتیبان (JSON)</button><button class="ghost" id="importButton" type="button">بازیابی پشتیبان</button><input id="importFile" type="file" accept="application/json,.json" hidden></div>
 <div class="notice">پیشنهاد: هر چند وقت یک‌بار خروجی پشتیبان بگیر تا یک نسخه از وظایف خارج از مرورگر هم داشته باشی.</div>
 </section>
-<footer>راهنما پلنر · نسخهٔ اولیهٔ وب‌اپ</footer>
+<footer>راهنما پلنر · تقویم شمسی و یادآوری آزمایشی</footer>
 </main>
 <script>
 (function(){
@@ -84,6 +122,38 @@ let tasks=[];
 try{const parsed=JSON.parse(localStorage.getItem(KEY)||'[]');tasks=Array.isArray(parsed)?parsed:[]}catch(e){tasks=[]}
 const faDigits=s=>String(s).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
 const toFa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[Number(d)]);
+const jalaliFormatter=new Intl.DateTimeFormat('en-u-ca-persian',{year:'numeric',month:'numeric',day:'numeric',timeZone:'UTC'});
+function jalaliParts(date){const p=jalaliFormatter.formatToParts(date);return {year:Number(p.find(x=>x.type==='year').value),month:Number(p.find(x=>x.type==='month').value),day:Number(p.find(x=>x.type==='day').value)}}
+function gregorianForJalali(y,m,d){
+ const start=Date.UTC(y+621,2,1),end=Date.UTC(y+622,3,1);
+ for(let t=start;t<end;t+=86400000){const dt=new Date(t),p=jalaliParts(dt);if(p.year===y&&p.month===m&&p.day===d)return {year:dt.getUTCFullYear(),month:dt.getUTCMonth()+1,day:dt.getUTCDate()}}
+ return null;
+}
+function parseJalali(value){const n=faDigits(value||'').trim().replace(/-/g,'/').split('/').map(Number);if(n.length!==3||!n.every(Number.isFinite))return null;const [y,m,d]=n;if(y<1200||y>1600||m<1||m>12||d<1||d>31)return null;const g=gregorianForJalali(y,m,d);return g?{...g,jy:y,jm:m,jd:d}:null}
+function jalaliString(y,m,d){return toFa(String(y)+'/'+String(m).padStart(2,'0')+'/'+String(d).padStart(2,'0'))}
+function formatReminder(iso){const d=new Date(iso);if(Number.isNaN(d.getTime()))return '';const p=jalaliParts(new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())));return jalaliString(p.year,p.month,p.day)+' '+toFa(String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'))}
+const nowJ=jalaliParts(new Date(Date.UTC(new Date().getFullYear(),new Date().getMonth(),new Date().getDate())));
+let calendarYear=nowJ.year,calendarMonth=nowJ.month,selectedDay=nowJ.day;
+function monthDates(y,m){const out=[];const start=Date.UTC(y+621,2,1),end=Date.UTC(y+622,3,1);for(let t=start;t<end;t+=86400000){const dt=new Date(t),p=jalaliParts(dt);if(p.year===y&&p.month===m)out.push({day:p.day,year:dt.getUTCFullYear(),month:dt.getUTCMonth()+1,gregDay:dt.getUTCDate(),weekday:(dt.getUTCDay()+1)%7})}return out}
+function renderCalendar(){
+ const grid=$('calendarGrid'),dates=monthDates(calendarYear,calendarMonth);
+ $('calendarTitle').textContent=toFa(calendarYear+'/'+String(calendarMonth).padStart(2,'0'));
+ const names=['ش','ی','د','س','چ','پ','ج'];grid.innerHTML=names.map(n=>`<div class="calendar-weekday">${n}</div>`).join('');
+ const first=dates[0];for(let i=0;i<first.weekday;i++)grid.insertAdjacentHTML('beforeend','<div></div>');
+ const today=jalaliParts(new Date(Date.UTC(new Date().getFullYear(),new Date().getMonth(),new Date().getDate())));
+ dates.forEach(d=>{const has=tasks.some(t=>{const p=parseJalali(t.date);return p&&p.jy===calendarYear&&p.jm===calendarMonth&&p.jd===d.day});const b=document.createElement('button');b.type='button';b.className='calendar-day'+(d.day===selectedDay?' selected':'')+(has?' has-tasks':'')+(today.year===calendarYear&&today.month===calendarMonth&&today.day===d.day?' today':'');b.textContent=toFa(d.day);b.setAttribute('aria-label',jalaliString(calendarYear,calendarMonth,d.day));b.addEventListener('click',()=>{selectedDay=d.day;renderCalendar()});grid.appendChild(b)});
+ renderDayTasks();
+}
+function renderDayTasks(){const root=$('dayTasks');const date=jalaliString(calendarYear,calendarMonth,selectedDay);const list=tasks.filter(t=>{const p=parseJalali(t.date);return p&&p.jy===calendarYear&&p.jm===calendarMonth&&p.jd===selectedDay});root.innerHTML=`<strong>وظایف ${date}</strong>`+(list.length?list.map(t=>`<div class="task"><strong>${esc(t.title)}</strong><div class="meta"><span class="pill">${t.done?'انجام‌شده':'باقی‌مانده'}</span><span class="pill">${esc(t.priority||'معمولی')}</span></div></div>`).join(''):'<div class="empty">برای این روز وظیفه‌ای ثبت نشده است.</div>')}
+function reminderTimestamp(dateText,timeText){if(!dateText&&!timeText)return '';if(!dateText||!timeText)throw new Error('برای یادآوری هم تاریخ و هم ساعت را وارد کن.');const p=parseJalali(dateText);if(!p)throw new Error('تاریخ یادآوری شمسی معتبر نیست.');const [hh,mm]=timeText.split(':').map(Number);if(!Number.isInteger(hh)||!Number.isInteger(mm))throw new Error('ساعت یادآوری معتبر نیست.');const d=new Date(p.year,p.month-1,p.day,hh,mm,0,0);if(d.getFullYear()!==p.year||d.getMonth()!==p.month-1||d.getDate()!==p.day)throw new Error('تاریخ یادآوری معتبر نیست.');return d.toISOString()}
+function checkReminders(){
+ if(!('Notification' in window)){ $('notificationStatus').textContent='این مرورگر از اعلان‌ها پشتیبانی نمی‌کند.';return}
+ if(Notification.permission!=='granted'){$('notificationStatus').textContent='ابتدا دکمهٔ فعال‌سازی اعلان‌ها را بزن.';return}
+ const now=Date.now();let sent=0;
+ tasks.forEach(t=>{if(t.done||!t.reminderAt||t.reminderSentAt)return;const when=Date.parse(t.reminderAt);if(Number.isFinite(when)&&when<=now){try{new Notification('یادآوری راهنما پلنر',{body:t.title,tag:'rahnama-'+t.id});t.reminderSentAt=new Date().toISOString();sent++}catch(e){}}});
+ if(sent){save();render();$('notificationStatus').textContent='اعلان '+toFa(sent)+' یادآوری ارسال شد.'}else $('notificationStatus').textContent='در حال حاضر یادآوری سررسیدشده‌ای وجود ندارد.';
+}
+
 function save(){try{localStorage.setItem(KEY,JSON.stringify(tasks));return true}catch(e){alert('ذخیره‌سازی انجام نشد. فضای مرورگر یا تنظیمات آن را بررسی کن.');return false}}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function todayText(){const d=new Date();return toFa(d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0'))}
@@ -99,24 +169,30 @@ function render(){
  root.innerHTML=list.map(t=>`<article class="task ${t.done?'done':''}" data-id="${esc(t.id)}">
  <div class="task-top"><input class="check" type="checkbox" aria-label="تغییر وضعیت وظیفه" data-action="toggle" data-id="${esc(t.id)}" ${t.done?'checked':''}>
  <div class="task-main"><div class="task-title">${esc(t.title)}</div>${t.notes?`<div class="desc">${esc(t.notes)}</div>`:''}
- <div class="meta">${t.date?`<span class="pill">📅 ${esc(t.date)}</span>`:''}<span class="pill ${t.priority==='فوری'?'today':''}">${esc(t.priority)}</span><span class="pill ${t.done?'done':''}">${t.done?'انجام‌شده':'باقی‌مانده'}</span></div></div></div>
+ <div class="meta">${t.date?`<span class="pill">📅 ${esc(t.date)}</span>`:''}${t.reminderAt?`<span class="pill reminder-pill">🔔 ${esc(formatReminder(t.reminderAt))}</span>`:''}<span class="pill ${t.priority==='فوری'?'today':''}">${esc(t.priority)}</span><span class="pill ${t.done?'done':''}">${t.done?'انجام‌شده':'باقی‌مانده'}</span></div></div></div>
  <div class="task-buttons"><button type="button" class="secondary" data-action="edit" data-id="${esc(t.id)}">ویرایش</button><button type="button" class="danger" data-action="delete" data-id="${esc(t.id)}">حذف</button></div></article>`).join('');
 }
-function resetForm(){$('taskForm').reset();$('taskId').value='';$('formHeading').textContent='＋ افزودن وظیفه';$('saveButton').textContent='ذخیره وظیفه';$('cancelEdit').hidden=true;$('taskPriority').value='معمولی'}
-$('taskForm').addEventListener('submit',e=>{e.preventDefault();const title=$('taskTitle').value.trim();if(!title)return;const id=$('taskId').value;const record={title,date:$('taskDate').value.trim(),priority:$('taskPriority').value,notes:$('taskNotes').value.trim()};
+function resetForm(){$('taskForm').reset();$('taskId').value='';$('formHeading').textContent='＋ افزودن وظیفه';$('saveButton').textContent='ذخیره وظیفه';$('cancelEdit').hidden=true;$('taskPriority').value='معمولی';$('reminderDate').value='';$('reminderTime').value=''}
+$('taskForm').addEventListener('submit',e=>{e.preventDefault();const title=$('taskTitle').value.trim();if(!title)return;const id=$('taskId').value;let reminderAt='';try{reminderAt=reminderTimestamp($('reminderDate').value.trim(),$('reminderTime').value)}catch(err){alert(err.message);return}const record={title,date:$('taskDate').value.trim(),priority:$('taskPriority').value,notes:$('taskNotes').value.trim(),reminderAt,reminderSentAt:''};
  if(id){const i=tasks.findIndex(t=>t.id===id);if(i>=0)tasks[i]={...tasks[i],...record}}else tasks.push({...record,id:String(Date.now())+'-'+Math.random().toString(36).slice(2,7),done:false,created:Date.now()});
  save();resetForm();render();});
 $('cancelEdit').addEventListener('click',resetForm);
 $('taskList').addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(!b)return;const t=tasks.find(x=>x.id===b.dataset.id);if(!t)return;
- if(b.dataset.action==='edit'){$('taskId').value=t.id;$('taskTitle').value=t.title;$('taskDate').value=t.date||'';$('taskPriority').value=t.priority;$('taskNotes').value=t.notes||'';$('formHeading').textContent='ویرایش وظیفه';$('saveButton').textContent='ذخیره تغییرات';$('cancelEdit').hidden=false;$('taskTitle').focus();window.scrollTo({top:0,behavior:'smooth'})}
+ if(b.dataset.action==='edit'){$('taskId').value=t.id;$('taskTitle').value=t.title;$('taskDate').value=t.date||'';$('taskPriority').value=t.priority;$('taskNotes').value=t.notes||'';if(t.reminderAt){const rd=new Date(t.reminderAt);const jp=jalaliParts(new Date(Date.UTC(rd.getFullYear(),rd.getMonth(),rd.getDate())));$('reminderDate').value=jalaliString(jp.year,jp.month,jp.day);$('reminderTime').value=String(rd.getHours()).padStart(2,'0')+':'+String(rd.getMinutes()).padStart(2,'0')}else{$('reminderDate').value='';$('reminderTime').value=''};$('formHeading').textContent='ویرایش وظیفه';$('saveButton').textContent='ذخیره تغییرات';$('cancelEdit').hidden=false;$('taskTitle').focus();window.scrollTo({top:0,behavior:'smooth'})}
  if(b.dataset.action==='delete'&&confirm('این وظیفه حذف شود؟')){tasks=tasks.filter(x=>x.id!==t.id);save();render();if($('taskId').value===t.id)resetForm()}
 });
 $('taskList').addEventListener('change',e=>{const c=e.target.closest('input[data-action="toggle"]');if(!c)return;const t=tasks.find(x=>x.id===c.dataset.id);if(t){t.done=c.checked;save();render()}});
 ['searchBox','statusFilter','priorityFilter','sortFilter'].forEach(id=>$(id).addEventListener(id==='searchBox'?'input':'change',render));
 $('exportButton').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({app:'rahnama-planner',version:1,tasks},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='rahnama-planner-backup.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)});
 $('importButton').addEventListener('click',()=>$('importFile').click());
-$('importFile').addEventListener('change',async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());const incoming=Array.isArray(data)?data:data.tasks;if(!Array.isArray(incoming)||!incoming.every(t=>t&&typeof t.title==='string'))throw new Error('bad');if(confirm('بازیابی پشتیبان، وظایف فعلی را جایگزین می‌کند. ادامه می‌دهی؟')){tasks=incoming.map((t,i)=>({id:String(t.id||Date.now()+'-'+i),title:t.title,date:String(t.date||''),priority:['فوری','مهم','معمولی'].includes(t.priority)?t.priority:'معمولی',notes:String(t.notes||''),done:!!t.done,created:Number(t.created)||Date.now()}));save();resetForm();render();alert('پشتیبان بازیابی شد.')}}catch(err){alert('فایل پشتیبان معتبر نیست.')}finally{$('importFile').value=''}});
-render();
+$('importFile').addEventListener('change',async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());const incoming=Array.isArray(data)?data:data.tasks;if(!Array.isArray(incoming)||!incoming.every(t=>t&&typeof t.title==='string'))throw new Error('bad');if(confirm('بازیابی پشتیبان، وظایف فعلی را جایگزین می‌کند. ادامه می‌دهی؟')){tasks=incoming.map((t,i)=>({id:String(t.id||Date.now()+'-'+i),title:t.title,date:String(t.date||''),priority:['فوری','مهم','معمولی'].includes(t.priority)?t.priority:'معمولی',notes:String(t.notes||''),done:!!t.done,created:Number(t.created)||Date.now(),reminderAt:String(t.reminderAt||''),reminderSentAt:String(t.reminderSentAt||'')}));save();resetForm();render();alert('پشتیبان بازیابی شد.')}}catch(err){alert('فایل پشتیبان معتبر نیست.')}finally{$('importFile').value=''}});
+$('prevMonth').addEventListener('click',()=>{calendarMonth--;if(calendarMonth<1){calendarMonth=12;calendarYear--}selectedDay=1;renderCalendar()});
+$('nextMonth').addEventListener('click',()=>{calendarMonth++;if(calendarMonth>12){calendarMonth=1;calendarYear++}selectedDay=1;renderCalendar()});
+$('useSelectedDate').addEventListener('click',()=>{$('taskDate').value=jalaliString(calendarYear,calendarMonth,selectedDay);$('taskTitle').focus();window.scrollTo({top:0,behavior:'smooth'})});
+$('enableNotifications').addEventListener('click',async()=>{if(!('Notification' in window)){$('notificationStatus').textContent='این مرورگر از اعلان‌ها پشتیبانی نمی‌کند.';return}try{const permission=await Notification.requestPermission();$('notificationStatus').textContent=permission==='granted'?'مجوز اعلان فعال شد. برای یادآوری هنگام بازبودن برنامه، بررسی دوره‌ای فعال است.': 'مجوز اعلان داده نشد؛ تنظیمات سایت را در مرورگر بررسی کن.';if(permission==='granted')checkReminders()}catch(e){$('notificationStatus').textContent='فعال‌سازی اعلان در این محیط ممکن نشد.'}});
+$('checkReminders').addEventListener('click',checkReminders);
+render();renderCalendar();
+if('Notification' in window&&Notification.permission==='granted')setInterval(checkReminders,30000);
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
   window.addEventListener('load', () => {
